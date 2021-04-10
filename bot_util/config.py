@@ -19,16 +19,19 @@ YAML_DUMP_CONFIG = {
 class __Config:
     def __init__(self):
         self.__default_config = HARD_CORDING_DEFAULT_CONFIG
+        self.__config = None
 
     @property
     def default_config(self):
         return self.__default_config
 
-    @default_config.setter
-    def default_config(self,value):
-        if not isinstance(value,dict):
-            raise TypeError(f'only set dict')
-        self.__default_config = value
+    def __getitem__(self,key):
+        if isinstance(key,str):
+            if self.__config is None:
+                self.load_config()
+            return self.__config[key]
+        else:
+            raise KeyError
 
     def load_config(self):
         if not os.path.isdir('./data'):
@@ -45,14 +48,12 @@ class __Config:
 
         if os.path.isfile('./config.yaml'):
             with open('./config.yaml')as f:
-                config = yaml.safe_load(f)
+                self.__config = yaml.safe_load(f)
         else:
             logger.warning(f'create config.yaml file')
             with open('./config.yaml','w')as f:
                 yaml.dump(self.default_config,f,**YAML_DUMP_CONFIG)
-            config = self.default_config
-
-        return config
+            self.__config = self.default_config
 
 
 config = __Config()
