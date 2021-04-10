@@ -1,10 +1,11 @@
 import os
+import logging
 
 
 import yaml
 
 
-from . import logger
+logger = logging.getLogger(__name__)
 
 
 HARD_CORDING_DEFAULT_CONFIG = dict()
