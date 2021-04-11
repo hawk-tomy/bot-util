@@ -27,6 +27,8 @@ YAML_DUMP_CONFIG = {
 class __Data:
     def __init__(self)-> None:
         self.__dataclass = {}
+        self.__reload_funcs = []
+        self.__save_funcs = []
         self.__names = set()
         p = Path('./data')
         if not p.exists():
@@ -73,6 +75,9 @@ class __Data:
             nonlocal value
             value = loader()
 
+        self.__reload_funcs.append(reload_func)
+        self.__save_funcs.append(save_func)
+
         setattr(self.__class__,name,property(getter))
         setattr(self.__class__,f'save_{name}',save_func)
         setattr(self.__class__,f'reload_{name}',reload_func)
@@ -86,6 +91,14 @@ class __Data:
             data = data.__class__
         self.__dataclass[key] = data
         return self
+
+    def all_reload(self):
+        for func in self.__reload_funcs:
+            func(self)
+
+    def all_save(self):
+        for func in self.__save_funcs:
+            func(self)
 
 
 data = __Data()
