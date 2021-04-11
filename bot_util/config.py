@@ -1,5 +1,10 @@
-import os
+from __future__ import annotations
+
+
+from dataclasses import asdict, dataclass, field, is_dataclass
 import logging
+from pathlib import Path
+from typing import Any, NewType, NoReturn, Union
 
 
 import yaml
@@ -8,7 +13,10 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
-HARD_CORDING_DEFAULT_CONFIG = dict()
+D = NewType('dataclass',Any)
+C = dict[str, D]
+
+
 YAML_DUMP_CONFIG = {
     'encoding':'utf8',
     'allow_unicode':True,
@@ -16,44 +24,64 @@ YAML_DUMP_CONFIG = {
     }
 
 
+@dataclass
 class __Config:
-    def __init__(self):
-        self.__default_config = HARD_CORDING_DEFAULT_CONFIG
-        self.__config = None
+    __default_config: C = field(default_factory=dict)
+    __config: Union[C, None] = None
 
     @property
-    def default_config(self):
-        return self.__default_config
+    def default_config(self)-> dict:
+        default_config = dict()
+        for k,d in self.__default_config.items():
+            default_config[k] = asdict(d)
+        return default_config
 
-    def __getitem__(self,key):
+    @property
+    def config(self)-> C:
+        if self.__config is None:
+            self.load_config()
+        return self.__config
+
+    def __getitem__(self,key)-> Union[D,NoReturn]:
         if isinstance(key,str):
-            if self.__config is None:
-                self.load_config()
-            return self.__config[key]
+            return self.config[key]
         else:
             raise KeyError
 
-    def load_config(self):
-        if not os.path.isdir('./data'):
-            os.mkdir('./data')
-            logger.warning(f'create data dirctory')
+    def items(self):
+        return self.config.items()
 
-        if os.path.isfile('./data/default_config.yaml'):
-            with open('./data/default_config.yaml')as f:
-                self.default_config =  yaml.safe_load(f)
-        else:
-            logger.warning(f'create data/default_config.yaml file')
-            with open('./data/default_config.yaml','w')as f:
-                yaml.dump(self.default_config,f,**YAML_DUMP_CONFIG)
+    def add_default_config(self, key: str, data: D)-> __Config:
+        if not is_dataclass(data):
+            raise TypeError('data must be instance or class of dataclass.')
+        if not isinstance(key,str):
+            raise KeyError('key must be str.')
+        if isinstance(data, type):
+            data = data()
+        self.__default_config[key] = data
+        return self
 
-        if os.path.isfile('./config.yaml'):
+    def __set_config(self, config: dict[str,Union[dict,list]])-> None:
+        new_config = dict()
+        for k,v in config.items():
+            if k not in self.__default_config:
+                continue
+            if isinstance(v,list):
+                v = self.__default_config[k].__class__(*v)
+            elif isinstance(v,dict):
+                v = self.__default_config[k].__class__(**v)
+            new_config[k] = v
+        self.__config = new_config
+
+    def load_config(self)-> None:
+        if Path('./config.yaml').exists():
             with open('./config.yaml')as f:
-                self.__config = yaml.safe_load(f)
+                self.__set_config(yaml.safe_load(f))
         else:
             logger.warning(f'create config.yaml file')
             with open('./config.yaml','w')as f:
                 yaml.dump(self.default_config,f,**YAML_DUMP_CONFIG)
-            self.__config = self.default_config
+            self.__set_config(self.default_config)
 
 
 config = __Config()
