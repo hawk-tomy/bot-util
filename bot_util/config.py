@@ -34,7 +34,7 @@ class __Config:
         if name in self.__names:
             return getattr(self,name)
         else:
-            raise AttributeError
+            raise AttributeError(f'{name} is not found')
 
     def load_config(self)-> None:
         if Path('./config.yaml').exists():
@@ -50,6 +50,7 @@ class __Config:
         for k,v in config.items():
             if k not in self.__default_config or k in self.__names:
                 continue
+            self.__names.add(k)
             v = self.__default_config[k].__class__(**v)
             setattr(self.__class__,k,v)
 
