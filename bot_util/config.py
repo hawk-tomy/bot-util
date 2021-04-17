@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-from dataclasses import dataclass, field, is_dataclass
+from dataclasses import asdict, dataclass, field, is_dataclass
 import logging
 from pathlib import Path
 from typing import Any, NewType, Union
@@ -42,9 +42,12 @@ class __Config:
                 self._setter(yaml.safe_load(f))
         else:
             logger.warning(f'create config.yaml file')
+            default_config = {}
+            for k,v in self.__default_config.items():
+                default_config[k] = asdict(v)
             with open('./config.yaml','w')as f:
-                yaml.dump(self.__default_config,f,**YAML_DUMP_CONFIG)
-            self._setter(self.__default_config)
+                yaml.dump(default_config,f,**YAML_DUMP_CONFIG)
+            self._setter(default_config)
 
     def _setter(self, config: dict[str,Union[dict,list]])-> None:
         for k,v in config.items():
