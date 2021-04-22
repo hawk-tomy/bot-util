@@ -57,15 +57,17 @@ class __Config:
             v = self.__default_config[k].__class__(**v)
             setattr(self.__class__,k,v)
 
-    def add_default_config(self, key: str, data: D)-> __Config:
+    def add_default_config(self, data: D, key: str= None)-> __Config:
         if not is_dataclass(data):
             raise TypeError('data must be instance or class of dataclass.')
+        if isinstance(data, type):
+            data = data()
+        if key is None:
+            key = data.__class__.__name__
         if not isinstance(key,str):
             raise KeyError('key must be str.')
         if key.startswith('_') or key in ('add_default_config', 'load_config', 'default_config'):
             raise KeyError(f'you cannot use this key({key}).')
-        if isinstance(data, type):
-            data = data()
         self.__default_config[key] = data
         return self
 
