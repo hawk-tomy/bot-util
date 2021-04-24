@@ -41,7 +41,7 @@ class __Config:
         default, names = self.__default_config, self.__names
         keys = default.keys() - names
         if keys:
-            self.__loader()
+            self._loader()
             for key in keys:
                 self._setter(key)
 
@@ -56,7 +56,7 @@ class __Config:
             self.__loaded_config = self.default_config
 
     def _setter(self, key: str)-> None:
-        value = self.__loaded_config
+        value = self.__loaded_config[key]
         self.__names.add(key)
         value = self.__default_config[key](**value)
         setattr(self.__class__, key, value)
