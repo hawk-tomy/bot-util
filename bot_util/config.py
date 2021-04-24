@@ -28,6 +28,7 @@ YAML_DUMP_CONFIG = {
 class __Config:
     __default_config: C = field(default_factory=dict)
     __names: set[str] = field(default_factory=set)
+    __loaded_config: dict = field(default_factory=dict)
 
     def __getattr__(self, name):
         self.load_config()
@@ -37,33 +38,36 @@ class __Config:
             raise AttributeError(f'{name} is not found')
 
     def load_config(self)-> None:
+        default, names = self.__default_config, self.__names
+        keys = default.keys() - names
+        if keys:
+            self.__liader
+            for key in keys:
+                self._setter(key)
+
+    def _loader(self)-> None:
         if Path('./config.yaml').exists():
             with open('./config.yaml')as f:
-                self._setter(yaml.safe_load(f))
+                self.__loaded_config = yaml.safe_load(f)
         else:
             logger.warning(f'create config.yaml file')
-            default_config = {}
-            for k,v in self.__default_config.items():
-                default_config[k] = asdict(v)
             with open('./config.yaml','w')as f:
-                yaml.dump(default_config,f,**YAML_DUMP_CONFIG)
-            self._setter(default_config)
+                yaml.dump(self.default_config,f,**YAML_DUMP_CONFIG)
+            self.__loaded_config = self.default_config.copy()
 
-    def _setter(self, config: dict[str,Union[dict,list]])-> None:
-        for k,v in config.items():
-            if k not in self.__default_config or k in self.__names:
-                continue
-            self.__names.add(k)
-            v = self.__default_config[k].__class__(**v)
-            setattr(self.__class__,k,v)
+    def _setter(self, key: str)-> None:
+        value = self.__loaded_config
+        self.__names.add(key)
+        value = self.__default_config[key](**value)
+        setattr(self.__class__,key,value)
 
     def add_default_config(self, data: D, /, *, key: str= None)-> __Config:
         if not is_dataclass(data):
             raise TypeError('data must be instance or class of dataclass.')
-        if isinstance(data, type):
-            data = data()
+        if not isinstance(data, type):
+            data = data.__class__
         if key is None:
-            key = data.__class__.__name__
+            key = data.__name__
         if not isinstance(key,str):
             raise KeyError('key must be str.')
         if key.startswith('_') or key in ('add_default_config', 'load_config', 'default_config'):
@@ -72,8 +76,11 @@ class __Config:
         return self
 
     @property
-    def default_config(self):
-        return self.__default_config
+    def default_config(self)-> dict:
+        as_dict = {}
+        for k,v in self.__default_config.items():
+            as_dict[k] = asdict(v)
+        return as_dict
 
 
 config = __Config()
