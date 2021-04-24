@@ -29,6 +29,7 @@ YAML_DUMP_CONFIG = {
     }
 
 
+@dataclass
 class __Config:
     __default_config: C = field(default_factory=dict)
     __names: set[str] = field(default_factory=set)
@@ -69,7 +70,7 @@ class __Config:
             self, data: ConfigBase, /, *, key: str= None
             )-> __Config:
         data = data if isinstance(data, type) else type(data)
-        if not is_dataclass(data) or not isinstance(data, ConfigBase):
+        if not is_dataclass(data) or not issubclass(data, ConfigBase):
             raise TypeError('data must be instance or class of dataclass.')
         if key is None:
             key = data.__name__

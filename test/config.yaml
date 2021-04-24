@@ -2,3 +2,5 @@ age_test:
   age: 20
 name_test:
   name: test_name
+EmbedColor:
+  color: 0
