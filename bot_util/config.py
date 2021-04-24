@@ -16,8 +16,10 @@ __all__ = ('ConigBase','config')
 logger = logging.getLogger(__name__)
 
 
-D = NewType('dataclass', Any)
-C = dict[str, D]
+class ConfigBase:pass
+
+
+C = dict[str, ConfigBase]
 
 
 YAML_DUMP_CONFIG = {
@@ -25,9 +27,6 @@ YAML_DUMP_CONFIG = {
     'allow_unicode': True,
     'default_flow_style': False
     }
-
-
-class ConfigBase:pass
 
 
 class __Config:
@@ -66,16 +65,19 @@ class __Config:
         value = self.__default_config[key](**value)
         setattr(self.__class__, key, value)
 
-    def add_default_config(self, data: D, /, *, key: str= None)-> __Config:
-        if not is_dataclass(data):
+    def add_default_config(
+            self, data: ConfigBase, /, *, key: str= None
+            )-> __Config:
+        data = data if isinstance(data, type) else type(data)
+        if not is_dataclass(data) or not isinstance(data, ConfigBase):
             raise TypeError('data must be instance or class of dataclass.')
-        if not isinstance(data, type):
-            data = data.__class__
         if key is None:
             key = data.__name__
         if not isinstance(key, str):
             raise KeyError('key must be str.')
-        if key.startswith('_') or key in ('add_default_config', 'load_config', 'default_config'):
+        if key.startswith('_') or key in (
+                'add_default_config', 'load_config', 'default_config'
+                ):
             raise KeyError(f'you cannot use this key({key}).')
         self.__default_config[key] = data
         return self
