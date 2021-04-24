@@ -53,7 +53,7 @@ def compose_embed(message):
     embed = Embed(
         description=message.content,
         timestamp=message.created_at,
-        color=config.embed_color
+        color=config.embed_color.color
     )
     embed.set_author(
         name=message.author.display_name,
