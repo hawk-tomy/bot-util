@@ -10,6 +10,9 @@ from typing import Any, NewType, Union
 import yaml
 
 
+from . import YAML_DUMP_CONFIG
+
+
 __all__ = ('ConigBase','config')
 
 
@@ -20,13 +23,6 @@ class ConfigBase:pass
 
 
 C = dict[str, ConfigBase]
-
-
-YAML_DUMP_CONFIG = {
-    'encoding': 'utf8',
-    'allow_unicode': True,
-    'default_flow_style': False
-    }
 
 
 @dataclass
