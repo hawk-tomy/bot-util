@@ -13,8 +13,10 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
-Dc = NewType('dataclass',Any)
-D = dict[str, Dc]
+class DataBase:pass
+
+
+D = dict[str, DataBase]
 
 
 YAML_DUMP_CONFIG = {
@@ -24,13 +26,13 @@ YAML_DUMP_CONFIG = {
     }
 
 
-class __Data:
-    def __init__(self)-> None:
+class DataParser:
+    def __init__(self, path='./data')-> None:
         self.__dataclass = {}
         self.__reload_funcs = []
         self.__save_funcs = []
         self.__names = set()
-        p = Path('./data')
+        p = Path(path)
         if not p.exists():
             p.mkdir()
             logger.warning(f'create data dirctory')
@@ -55,16 +57,16 @@ class __Data:
         self.__names.add(name)
         cls = self.__dataclass.get(name,None)
 
-        def loader()-> Dc:
+        def loader()-> DataBase:
             with p.open()as f:
                 value = yaml.safe_load(f)
             if cls is not None:
                 value = cls(**value)
             return value
 
-        value: Dc = loader()
+        value: DataBase = loader()
 
-        def getter(self)-> Dc:
+        def getter(self)-> DataBase:
             return value
 
         def save_func(self)-> None:
@@ -82,13 +84,12 @@ class __Data:
         setattr(self.__class__,f'save_{name}',save_func)
         setattr(self.__class__,f'reload_{name}',reload_func)
 
-    def add_dataclass(self, key: str, data: D)-> __Data:
-        if not is_dataclass(data):
+    def add_dataclass(self, key: str, data: D)-> DataParser:
+        data = data if isinstance(data, type) else type(data)
+        if not is_dataclass(data) or not issubclass(data, DataBase):
             raise TypeError('data must be instance or class of dataclass.')
         if not isinstance(key,str):
             raise KeyError('key must be str.')
-        if not isinstance(data, type):
-            data = data.__class__
         self.__dataclass[key] = data
         return self
 
@@ -99,6 +100,3 @@ class __Data:
     def all_save(self):
         for func in self.__save_funcs:
             func(self)
-
-
-data = __Data()
