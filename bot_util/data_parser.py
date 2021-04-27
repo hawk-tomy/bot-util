@@ -10,6 +10,9 @@ from typing import Any, NewType
 import yaml
 
 
+from . import YAML_DUMP_CONFIG
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -17,13 +20,6 @@ class DataBase:pass
 
 
 D = dict[str, DataBase]
-
-
-YAML_DUMP_CONFIG = {
-    'encoding':'utf8',
-    'allow_unicode':True,
-    'default_flow_style':False
-    }
 
 
 class DataParser:
