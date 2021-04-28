@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 
-from dataclasses import asdict, is_dataclass
-from pathlib import Path
+from dataclasses import asdict, dataclass, field, is_dataclass
 import logging
-from typing import Any, NewType
+from pathlib import Path
+from typing import Callable
 
 
 import yaml
@@ -13,25 +13,22 @@ import yaml
 from . import YAML_DUMP_CONFIG
 
 
+__all__ = ('DataParser','DataBase')
 logger = logging.getLogger(__name__)
-
-
 class DataBase:pass
-
-
 D = dict[str, DataBase]
 
 
+@dataclass
 class DataParser:
-    def __init__(self, path='./data')-> None:
-        self.__dataclass = {}
-        self.__reload_funcs = []
-        self.__save_funcs = []
-        self.__names = set()
-        p = Path(path)
-        if not p.exists():
-            p.mkdir()
-            logger.warning(f'create data dirctory')
+    _path: str = './data'
+    __dataclass: D = field(default_factory=dict)
+    __names: set[str] = field(default_factory=set)
+    __reload_funcs: list[Callable] = field(default_factory=list)
+    __save_funcs: list[Callable] = field(default_factory=list)
+
+    def __pre_init__(self):
+        self._path = Path(self._path)
 
     def __getattr__(self, name):
         self.load_data()
@@ -41,7 +38,10 @@ class DataParser:
             raise AttributeError
 
     def load_data(self)-> None:
-        for p in Path('./data').iterdir():
+        if not self._path.exists():
+            self._path.mkdir()
+            logger.warning(f'create data dirctory')
+        for p in self._path.iterdir():
             if not p.is_file() or p.suffix not in ('.yaml','.yml'):
                 continue
             self._setter(p)
