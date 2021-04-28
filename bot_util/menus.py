@@ -62,6 +62,12 @@ class MsgMenuBase:
             else:
                 self._message_check = v
 
+    def add_message(self, func):
+        self._message = func
+
+    def add_message_check(self, func):
+        self._message_check = func
+
     def message_check(self,message):
         """The function that used to check wheter the message should be processed.
         This is passed to discord.ext.commands.Bot.wait_for (method).
