@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 
-from dataclasses import asdict, dataclass, field, is_dataclass
+from dataclasses import InitVar, asdict, dataclass, field, is_dataclass
 import logging
 from pathlib import Path
+from typing import Any, TypeVar
 
 
 import yaml
@@ -16,17 +17,19 @@ __all__ = ('ConfigParser','ConfigBase')
 logger = logging.getLogger(__name__)
 class ConfigBase:pass
 C = dict[str, ConfigBase]
+CP = TypeVar('CP', bound='ConfigParser')
 
 
 @dataclass
 class ConfigParser:
-    _path: Path = './config.yaml'
-    __default_config: C = field(default_factory=dict)
-    __names: set[str] = field(default_factory=set)
-    __loaded_config: dict = None
+    path: InitVar[str] = './config.yaml'
+    __path: Path = field(init=False)
+    __default_config: C = field(default_factory=dict, init=False)
+    __names: set[str] = field(default_factory=set, init=False)
+    __loaded_config: dict[str,Any] = field(default=None, init=False)
 
-    def __post_init__(self):
-        self._path = Path(self._path)
+    def __post_init__(self, path):
+        self.__path = Path(path)
 
     def __getattr__(self, name):
         self.load_config()
@@ -36,16 +39,19 @@ class ConfigParser:
             raise AttributeError(f'{name} is not found')
 
     def load_config(self)-> None:
-        default, names = self.__default_config, self.__names
-        keys = default.keys() - names
-        if keys:
+        if self.__loaded_config is None:
             self._loader()
-            for key in keys:
-                self._setter(key)
+        keys = (
+            self.__loaded_config.keys()
+            + self.__default_config.keys()
+            - self.__names
+            )
+        for key in keys:
+            self._setter(key)
 
     def _loader(self)-> None:
-        if self._path.exists():
-            with self._path.open(encoding='utf-8')as f:
+        if self.__path.exists():
+            with self.__path.open(encoding='utf-8')as f:
                 self.__loaded_config = yaml.safe_load(f)
         else:
             logger.warning(f'create config.yaml file')
@@ -53,12 +59,12 @@ class ConfigParser:
             self._save()
 
     def _save(self):
-        with self._path.open('w',encoding='Utf-8')as f:
+        with self.__path.open('w',encoding='Utf-8')as f:
             yaml.dump(self.__loaded_config, f, **YAML_DUMP_CONFIG)
 
     def _setter(self, key: str)-> None:
-        value = self.__loaded_config.get(key)
-        if value is None:
+        loaded_value = self.__loaded_config.get(key)
+        if loaded_value is None:
             try:
                 value = self.__default_config[key]()
             except Exception:
@@ -66,13 +72,13 @@ class ConfigParser:
             else:
                 self.__loaded_config[key] = asdict(value)
         else:
-            value = self.__default_config[key](**value)
+            value = self.__default_config[key](**loaded_value)
         self.__names.add(key)
         setattr(self.__class__, key, value)
 
     def add_default_config(
-            self, data: ConfigBase, /, *, key: str= None
-            )-> ConfigParser:
+            self: CP, data: ConfigBase, /, *, key: str= None
+            )-> CP:
         data = data if isinstance(data, type) else type(data)
         if not is_dataclass(data) or not issubclass(data, ConfigBase):
             raise TypeError('data must be instance or class of dataclass.')
@@ -81,9 +87,9 @@ class ConfigParser:
         if not isinstance(key, str):
             raise KeyError('key must be str.')
         if key.startswith('_') or key in (
-                'add_default_config', 'load_config', 'default_config'
+                'add_default_config', 'load_config', 'default_config',
                 ):
-            raise KeyError(f'you cannot use this key({key}).')
+            raise KeyError(f'you cannot use this key ({key}).')
         flag = key in self.__default_config
         self.__default_config[key] = data
         if flag:
@@ -93,7 +99,7 @@ class ConfigParser:
         return self
 
     @property
-    def default_config(self)-> dict:
+    def default_config(self)-> dict[str,dict]:
         as_dict = {}
         for k, v in self.__default_config.items():
             try:

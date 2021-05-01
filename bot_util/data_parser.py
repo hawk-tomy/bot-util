@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 
-from dataclasses import asdict, dataclass, field, is_dataclass
+from dataclasses import InitVar, asdict, dataclass, field, is_dataclass
 import logging
 from pathlib import Path
-from typing import Callable, Union
+from typing import Callable, TypeVar, Union
 
 
 import yaml
@@ -17,18 +17,20 @@ __all__ = ('DataParser','DataBase')
 logger = logging.getLogger(__name__)
 class DataBase:pass
 D = dict[str, DataBase]
+DP = TypeVar('DP', bound='DataParser')
 
 
 @dataclass
 class DataParser:
-    _path: Path = './data'
-    __dataclass: D = field(default_factory=dict)
-    __names: set[str] = field(default_factory=set)
-    __reload_funcs: list[Callable] = field(default_factory=list)
-    __save_funcs: list[Callable] = field(default_factory=list)
+    path: InitVar[str] = './data'
+    __path: Path = field(init=False)
+    __dataclass: D = field(default_factory=dict, init=False)
+    __names: set[str] = field(default_factory=set, init=False)
+    __reload_funcs: list[Callable] = field(default_factory=list, init=False)
+    __save_funcs: list[Callable] = field(default_factory=list, init=False)
 
-    def __post_init__(self):
-        self._path = Path(self._path)
+    def __post_init__(self, path):
+        self.__path = Path(path)
 
     def __getattr__(self, name):
         self.load_data()
@@ -38,11 +40,11 @@ class DataParser:
             raise AttributeError
 
     def load_data(self)-> None:
-        if not self._path.exists():
-            self._path.mkdir()
+        if not self.__path.exists():
+            self.__path.mkdir()
             logger.warning(f'create data dirctory')
         paths = set(
-            p.stem for p in self._path.iterdir()
+            p.stem for p in self.__path.iterdir()
                 if p.is_file() and p.suffix in ('.yaml','.yml')
                 )
         keys = paths - self.__names
@@ -50,23 +52,13 @@ class DataParser:
             self._setter(key)
 
     def _setter(self, key: str)-> None:
-        if (not ((p:=self._path/f'{key}.yaml').exists()
-                or (p:=self._path/f'{key}.yml').exists())
+        if (not ((p:=self.__path/f'{key}.yaml').exists()
+                or (p:=self.__path/f'{key}.yml').exists())
                 or key in self.__names):
             return
         self.__names.add(key)
         cls = self.__dataclass.get(key)
-        if cls is not None:
-
-            def loader()-> DataBase:
-                with p.open(encoding='utf-8')as f:
-                    return cls(**yaml.safe_load(f))
-
-            def save_func(self)-> None:
-                with p.open('w',encoding='utf-8')as f:
-                    yaml.dump(asdict(value),f,**YAML_DUMP_CONFIG)
-
-        else:
+        if cls is None:
 
             def loader()-> Union[dict, list]:
                 with p.open(encoding='utf-8')as f:
@@ -75,6 +67,16 @@ class DataParser:
             def save_func(self)-> None:
                 with p.open('w',encoding='utf-8')as f:
                     yaml.dump(value,f,**YAML_DUMP_CONFIG)
+
+        else:
+
+            def loader()-> DataBase:
+                with p.open(encoding='utf-8')as f:
+                    return cls(**yaml.safe_load(f))
+
+            def save_func(self)-> None:
+                with p.open('w',encoding='utf-8')as f:
+                    yaml.dump(asdict(value),f,**YAML_DUMP_CONFIG)
 
         value: DataBase = loader()
 
@@ -92,7 +94,7 @@ class DataParser:
         setattr(self.__class__,f'save_{key}',save_func)
         setattr(self.__class__,f'reload_{key}',reload_func)
 
-    def add_dataclass(self, data: D, *, key: str=None)-> DataParser:
+    def add_dataclass(self: DP, data: D, *, key: str=None)-> DP:
         data = data if isinstance(data, type) else type(data)
         if not is_dataclass(data) or not issubclass(data, DataBase):
             raise TypeError('data must be instance or class of dataclass.')
