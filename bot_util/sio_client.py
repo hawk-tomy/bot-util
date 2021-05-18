@@ -22,7 +22,7 @@ class SocketIOSettings(ConfigBase):
     url: str= ''
 config.add_default_config(SocketIOSettings, key='socketio_settings')
 sio_setting: SocketIOSettings= config.socketio_settings
-url = sio_setting.url
+
 
 class SioClient(AsyncClient):
     def __init__(self):
