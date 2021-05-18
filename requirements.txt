@@ -1,4 +1,6 @@
 discord.py
 pyyaml
 dispander
+aiohttp
+python-socketio
 git+https://github.com/Rapptz/discord-ext-menus
