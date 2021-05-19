@@ -1,4 +1,4 @@
-from asyncio import Queue
+from asyncio import Queue, TimeoutError, wait_for
 from dataclasses import dataclass
 from logging import getLogger
 from pathlib import Path
@@ -36,6 +36,7 @@ class SioClient(AsyncClient):
         #4 sIO b2P event
         self.__wait_events: dict[int, Queue]= {}
         self.__latest_id: int= 0
+        self.TimeoutError = TimeoutError
 
         event_dict_path = Path(__file__).resolve().parent / 'event_dict.yaml'
         if event_dict_path.exists():
@@ -94,6 +95,14 @@ class SioClient(AsyncClient):
 
     def is_b2p_id_in(self, id_: int)-> bool:
         return id_ in self.__wait_events
+
+    async def call_b2p(self, event, data=None, *, namespace=None, callback=None, timeout=None):
+        if not isinstance(data, dict):
+            raise ValueError
+        id_, queue = self.add_b2p_event()
+        data['id'] = id_
+        await self.emit(event=event, data=data, namespace=namespace, callback=callback)
+        return await wait_for(queue.get(), timeout=timeout)
 
     #hard coding events
     def __events_register(self):
