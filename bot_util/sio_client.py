@@ -36,18 +36,25 @@ class SioClient(AsyncClient):
         #4 sIO b2P event
         self.__wait_events: dict[int, Queue]= {}
         self.__latest_id: int= 0
-        self.TimeoutError = TimeoutError
 
         event_dict_path = Path(__file__).resolve().parent / 'event_dict.yaml'
         if event_dict_path.exists():
             with event_dict_path.open(encoding='utf-8')as f:
-                self.event_dict: dict[str, str]= yaml.safe_load(f)
+                self.__event_dict: dict[str, str]= yaml.safe_load(f)
         else:
-            self.event_dict = {}
+            self.__event_dict = {}
             with event_dict_path.open(encoding='utf-8', mode='w')as f:
                 yaml.dump(self.event_dict,f)
         self.__loader()
         self.__events_register()
+
+    @property
+    def TimeoutError(self):
+        return TimeoutError
+
+    @property
+    def event_dict(self):
+        return self.__event_dict.copy()
 
     #data framework
     def __loader(self):
@@ -97,6 +104,8 @@ class SioClient(AsyncClient):
         return id_ in self.__wait_events
 
     async def call_b2p(self, event, data=None, *, namespace=None, callback=None, timeout=None):
+        if self.event_dict.get(event) != 'b2p':
+            raise ValueError
         if not isinstance(data, dict):
             raise ValueError
         id_, queue = self.add_b2p_event()
