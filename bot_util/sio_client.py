@@ -1,6 +1,6 @@
 from asyncio import Queue, TimeoutError, wait_for
 from dataclasses import dataclass
-from logging import Filter, getLogger
+from logging import getLogger
 from pathlib import Path
 
 
@@ -14,12 +14,16 @@ from .config import config, ConfigBase
 __all__ = ('SioClient',)
 
 
-class PingPongFilter(Filter):
+class Filter:
+    def __init__(self, *args):
+        self.filter_strings = args
+
     def filter(self, recoad):
         msg = recoad.getMessage()
-        return 'PING' in msg or 'PONG' in msg
+        return not any((s in msg) for s in self.strings)
+
 logger = getLogger(__name__)
-logger.addFilter(PingPongFilter())
+logger.addFilter(Filter('PING', 'PONG'))
 
 
 @dataclass
