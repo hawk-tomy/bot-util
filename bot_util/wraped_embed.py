@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 import datetime
-from typing import overload
+from typing import Union, overload
 
 from discord.colour import Colour
 from discord.embeds import Embed as Embed_
@@ -95,62 +95,22 @@ class Embed(Embed_):
     def __len__(self)-> int:
         return super().__len__()
 
-    @overload
     @property
-    def colour(self)-> _EmptyEmbed:
-        ...
-
-    @overload
-    @property
-    def colour(self)-> Colour:
-        ...
-
-    @property
-    def colour(self):
+    def colour(self)-> Union[Colour, _EmptyEmbed]:
         return super().colour
 
-    @overload
     @colour.setter
-    def colour(self, value: _EmptyEmbed):
-        ...
-
-    @overload
-    @colour.setter
-    def colour(self, value: Colour):
-        ...
-
-    @colour.setter
-    def colour(self, value):
+    def colour(self, value: Union[Colour, _EmptyEmbed]):
         super().color = value
 
     color = colour
 
-    @overload
     @property
-    def timestamp(self)-> _EmptyEmbed:
-        ...
-
-    @overload
-    @property
-    def timestamp(self)-> datetime.datetime:
-        ...
-
-    @property
-    def timestamp(self):
+    def timestamp(self)-> Union[_EmptyEmbed, datetime.datetime]:
         return super().timestamp
 
-    @overload
     @timestamp.setter
-    def timestamp(self, value: _EmptyEmbed):
-        ...
-
-    @overload
-    @timestamp.setter
-    def timestamp(self, value: datetime.datetime):
-        ...
-
-    @timestamp.setter
-    def timestamp(self, value):
+    def timestamp(self, value: Union[_EmptyEmbed, datetime.datetime]):
         super().timestamp = value
 
     @property
