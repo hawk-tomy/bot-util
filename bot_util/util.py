@@ -14,10 +14,8 @@ def split_line(string: str, num: int)-> list[str]:
     str1, str2 = string[:num], string[num:]
     str1_split = str1.splitlines(keepends=True)
     if len(str1_split) > 1:
-        str1, str12 = ''.join(str1_split[:-1]), str1_split[-1]
-    else:
-        str1, str12 = str1_split[0], ''
-    str2 = str12 + str2
+        str1 = ''.join(str1_split[:-1])
+        str2 = str1_split[-1] + str2
     splited = [str1]
     if len(str2) > num:
         splited.extend(split_line(str2, num))
