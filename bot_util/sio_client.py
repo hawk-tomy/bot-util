@@ -17,13 +17,13 @@ __all__ = ('SioClient',)
 class Filter:
     def __init__(self, *args):
         self.filter_strings = args
-
     def filter(self, recoad):
         msg = recoad.getMessage()
         return not any((s in msg) for s in self.filter_strings)
 
 logger = getLogger(__name__)
-logger.addFilter(Filter('PING', 'PONG'))
+eio_log = logger.getChild('eIO')
+eio_log.addFilter(Filter('PING', 'PONG'))
 
 
 @dataclass
@@ -39,7 +39,7 @@ class SioClient(AsyncClient):
     def __init__(self):
         super().__init__(
             logger=logger.getChild('sIO'),
-            engineio_logger=logger.getChild('eIO'),
+            engineio_logger=eio_log,
         )
 
         #4 sIO p2b event
