@@ -1,7 +1,7 @@
 """
 MIT License
 
-Copyright (c) 2019 1ntegrale9
+Copyright (c) 2019 - 2021 1ntegrale9
 
 https://github.com/DiscordBotPortalJP/dispander
 """
