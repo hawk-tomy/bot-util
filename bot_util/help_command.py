@@ -38,9 +38,7 @@ class Help(commands.HelpCommand):
         if lv and min(lv):
             for index, line in enumerate(content_line):
                 content_line[index] = ''.join(line.split('-'*min(lv))[1:])
-        else:
-            content_line.append('コマンドは存在しません。')
-        return ''.join(content_line)
+        return ''.join(content_line) or 'コマンドは存在しません。'
 
     async def send_bot_help(self,mapping):
         embed = discord.Embed(title='helpコマンド', color=self.color)
