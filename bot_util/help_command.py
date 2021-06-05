@@ -35,10 +35,11 @@ class Help(commands.HelpCommand):
                     f" : {cmd.short_doc}\n")
                     )
                 lv.append(0)
-        if min(lv):
+        if lv and min(lv):
             for index, line in enumerate(content_line):
-                content_line[index] = \
-                    ''.join(line.split('-'*min(lv))[1:])
+                content_line[index] = ''.join(line.split('-'*min(lv))[1:])
+        else:
+            content_line.append('コマンドは存在しません。')
         return ''.join(content_line)
 
     async def send_bot_help(self,mapping):
