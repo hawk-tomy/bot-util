@@ -82,12 +82,6 @@ class Help(commands.HelpCommand):
             title=f"{self.context.prefix}{group.qualified_name}",
             description=group.description,color=self.color
             )
-        if group.aliases:
-            embed.add_field(
-                name="有効なエイリアス",
-                value="`" + "`, `".join(group.aliases) + "`",
-                inline=False
-                )
         if group.help:
             embed.add_field(
                 name="ヘルプテキスト",
@@ -103,23 +97,14 @@ class Help(commands.HelpCommand):
         await self.get_destination().send(embed=embed)
 
     async def send_command_help(self,command):
-        params = " ".join(command.clean_params.keys())
         embed = discord.Embed(
-            title=(
-                f"{self.context.prefix}{command.qualified_name}"
-                f" {params}"
-                ),
-            description=command.description,color=self.color
+            title=self.get_command_signature(command),
+            description=command.description,
+            color=self.color
             )
-        if command.aliases:
-            embed.add_field(
-                name="有効なエイリアス：",
-                value="`" + "`, `".join(command.aliases) + "`",
-                inline=False
-                )
         if command.help:
             embed.add_field(
-                name="ヘルプテキスト：",
+                name="ヘルプテキスト",
                 value=command.help,
                 inline=False
                 )
@@ -139,9 +124,9 @@ class Help(commands.HelpCommand):
         command_name = self.invoked_with
         return (
             f"{self.clean_prefix}{command_name}"
-            " [command_name] とすることでコマンドについてのヘルプを閲覧できます。\n"
+            " <command_name> とすることでコマンドについてのヘルプを閲覧できます。\n"
             f"{self.clean_prefix}{command_name}"
-            " [category_name] とすることでカテゴリーの詳細情報を閲覧できます。"
+            " <category_name> とすることでカテゴリーの詳細情報を閲覧できます。"
             )
 
     def command_not_found(self,string):
