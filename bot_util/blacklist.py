@@ -46,6 +46,7 @@ class BlackList:
                     await ctx.channel.send(msg)
                 else:
                     await ctx.author.send(msg)
+            logger.info(f'check is failed. {name}, {ctx.author.id}')
         return flag
 
     def check_deco(self, name: str= None):
@@ -60,10 +61,12 @@ class BlackList:
 
     def add(self, id_: Any)-> None:
         if id_ not in self._ids:
+            logger.info(f'{self.name}, added {id_}')
             self._ids.append(id_)
 
     def delete(self, id_: Any)-> None:
         if id_ in self._ids:
+            logger.info(f'{self.name}, delete {id_}')
             self._ids.remove(id_)
 
 
@@ -96,6 +99,7 @@ class BlackLists(DataBase):
             self.blacklists[key] = v
             if not hasattr(self, key):
                 setattr(self, key, v)
+            logger.info(f'create blacklist {key=}')
         return self[key]
 
     def combine_blacklist(
@@ -117,6 +121,7 @@ class BlackLists(DataBase):
                 ids_list.append(arg.ids)
             else:
                 raise ValueError(f'{arg} must be BlackList.')
+        logger.info(f'combine blacklist {args}')
         return BlackList(
             name or ', '.join(args),
             get_unique_list(ids_list, need_flatten=True)
