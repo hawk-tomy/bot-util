@@ -20,11 +20,14 @@ class BlackList:
     name: InitVar[str]
     _ids: list[Any]= field(default_factory=list)
 
+    def __post_init__(self, name):
+        self.name = name
+
     def check(self, msg: Union[Context, Message])-> bool:
         return msg.author.id not in self._ids
 
     async def async_check(
-            self, ctx: Union[Context, Message], name: str= None
+            self, ctx: Union[Context, Message], name: str= None, reply: bool= True
             )-> bool:
         name = name or self.name
         flag = self.check(ctx)
@@ -34,9 +37,15 @@ class BlackList:
                 '異議申し立てはサーバーオーナーへ。'
                 )
             try:
-                await ctx.re_error(msg)
+                if reply:
+                    await ctx.re_error(msg)
+                else:
+                    await ctx.error(msg)
             except AttributeError:
-                await ctx.author.send(msg)
+                if reply:
+                    await ctx.channel.send(msg)
+                else:
+                    await ctx.author.send(msg)
         return flag
 
     def check_deco(self, name: str= None):
