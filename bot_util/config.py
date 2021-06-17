@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 from .config_parser import ConfigBase, ConfigParser
 
 

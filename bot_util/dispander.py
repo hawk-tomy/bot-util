@@ -5,6 +5,9 @@ Copyright (c) 2019 - 2021 1ntegrale9
 
 https://github.com/DiscordBotPortalJP/dispander
 """
+from __future__ import annotations
+
+
 import re
 
 

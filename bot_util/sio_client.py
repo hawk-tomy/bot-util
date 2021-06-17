@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 from asyncio import Queue, TimeoutError, wait_for
 from dataclasses import dataclass
 from logging import getLogger

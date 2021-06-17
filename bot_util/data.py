@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 from .data_parser import DataBase, DataParser
 
 

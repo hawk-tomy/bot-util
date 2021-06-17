@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 from discord import Colour, Message
 from discord.ext.commands import Context as _Context
 

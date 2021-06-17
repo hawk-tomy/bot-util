@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+
 __all__ = ('YAML_DUMP_CONFIG','split_line')
 
 
