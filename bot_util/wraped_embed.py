@@ -2,7 +2,7 @@ from __future__ import annotations
 
 
 import datetime
-from enum import Enum
+from enum import IntEnum
 from typing import Union, overload
 
 
@@ -11,7 +11,7 @@ from discord.embeds import Embed as Embed_
 from discord.embeds import EmbedProxy, EmptyEmbed, _EmptyEmbed
 
 
-class EmbedLimit(Enum):
+class EmbedLimit(IntEnum):
     title = 256
     description = 2048
     fields = 25
@@ -24,6 +24,7 @@ class EmbedLimit(Enum):
 class Embed(Embed_):
     """The MIT License (MIT)
     Copyright (c) 2015-present Rapptz
+    https://github.com/Rapptz/discord.py
     Copyed By discord.py version 1.7.2-final
     """
 
