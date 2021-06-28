@@ -30,15 +30,18 @@ class BlackList:
         return msg.author.id not in self._ids
 
     async def async_check(
-            self, ctx: Union[Context, Message], name: str= None, reply: bool= True
-            )-> bool:
+            self,
+            ctx: Union[Context, Message],
+            name: str= None,
+            reply: bool= True
+    )-> bool:
         name = name or self.name
         flag = self.check(ctx)
         if not flag:
             msg = (
                 f'あなたは{name!s}の使用が禁止されています。'
                 '異議申し立てはサーバーオーナーへ。'
-                )
+            )
             try:
                 if reply:
                     await ctx.re_error(msg)
@@ -83,7 +86,7 @@ class BlackLists(DataBase):
         elif not isinstance(blacklists, dict):
             raise ValueError('blacklists must be dict or None.')
         self.blacklists = blacklists
-        for k,v in blacklists.items():
+        for k, v in blacklists.items():
             instance = BlackList(k, v['_ids'])
             self.blacklists[k] = instance
             if not hasattr(self, k):
@@ -110,7 +113,7 @@ class BlackLists(DataBase):
             *args: Union[str, BlackList],
             silent_create: bool= False,
             name: str= None
-            )-> BlackList:
+    )-> BlackList:
         ids_list = []
         for arg in args:
             if isinstance(arg, str):
@@ -128,7 +131,8 @@ class BlackLists(DataBase):
         return BlackList(
             name or ', '.join(args),
             get_unique_list(ids_list, need_flatten=True)
-            )
+        )
+
 
 data.add_dataclass(BlackLists, key='blacklists')
-blacklists :BlackLists =data.blacklists
+blacklists: BlackLists= data.blacklists

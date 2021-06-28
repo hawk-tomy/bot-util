@@ -13,9 +13,14 @@ import yaml
 from . import YAML_DUMP_CONFIG
 
 
-__all__ = ('DataParser','DataBase')
+__all__ = ('DataParser', 'DataBase')
 logger = logging.getLogger(__name__)
-class DataBase:pass
+
+
+class DataBase:
+    pass
+
+
 D = dict[str, DataBase]
 DP = TypeVar('DP', bound='DataParser')
 
@@ -28,7 +33,7 @@ class DataParser:
     __names: set[str] = field(default_factory=set, init=False)
     __reload_funcs: list[Callable] = field(default_factory=list, init=False)
     __save_funcs: list[Callable] = field(default_factory=list, init=False)
-    __yaml_config: dict[str,dict] = field(default_factory=dict, init=False)
+    __yaml_config: dict[str, dict] = field(default_factory=dict, init=False)
 
     def __post_init__(self, path):
         self.__path = Path(path)
@@ -36,27 +41,28 @@ class DataParser:
     def __getattr__(self, name):
         self.load_data()
         if name in self.__names:
-            return getattr(self,name)
+            return getattr(self, name)
         else:
             raise AttributeError
 
     def load_data(self)-> None:
         if not self.__path.exists():
             self.__path.mkdir()
-            logger.warning(f'create data dirctory')
+            logger.warning('create data dirctory')
         need_load = set(
             p.stem for p in self.__path.iterdir()
-                if p.is_file() and p.suffix in ('.yaml','.yml')
-                ) | set(self.__dataclass.keys())
+                if p.is_file() and p.suffix in ('.yaml', '.yml')
+        ) | set(self.__dataclass.keys())
         keys = need_load - self.__names
         for key in keys:
             self._setter(key)
 
     def _setter(self, key: str)-> None:
         is_not_exists = False
-        if (not ((p:=self.__path/f'{key}.yaml').exists()
-                or (p:=self.__path/f'{key}.yml').exists())
-                ):
+        if (not (
+            (p:=self.__path/f'{key}.yaml').exists()
+            or (p:=self.__path/f'{key}.yml').exists()
+        )):
             p = self.__path/f'{key}.yaml'
             is_not_exists = True
         if key in self.__names:
@@ -67,7 +73,7 @@ class DataParser:
         cls = self.__dataclass.get(key)
         if cls is None:
             if is_not_exists:
-                with p.open('w',encoding='utf-8')as f:
+                with p.open('w', encoding='utf-8')as f:
                     yaml.dump({}, f, **yaml_config)
 
             def loader()-> Union[dict, list]:
@@ -75,23 +81,23 @@ class DataParser:
                     return yaml.safe_load(f)
 
             def save_func(self)-> None:
-                with p.open('w',encoding='utf-8')as f:
+                with p.open('w', encoding='utf-8')as f:
                     yaml.dump(value, f, **yaml_config)
 
         else:
             if is_not_exists:
-                with p.open('w',encoding='utf-8')as f:
+                with p.open('w', encoding='utf-8')as f:
                     yaml.dump(asdict(cls()), f, **yaml_config)
 
             def loader()-> DataBase:
-                with p.open(encoding= 'utf-8')as f:
+                with p.open(encoding='utf-8')as f:
                     data = yaml.safe_load(f)
                     if data is None:
                         return cls()
                     return cls(**data)
 
             def save_func(self)-> None:
-                with p.open('w', encoding= 'utf-8')as f:
+                with p.open('w', encoding='utf-8')as f:
                     yaml.dump(asdict(value), f, **yaml_config)
 
         value: Union[DataBase, dict, list]= loader()
@@ -112,7 +118,7 @@ class DataParser:
 
     def add_dataclass(
             self: DP, data: D, *, key: str= None, yaml_config: dict= None
-            )-> DP:
+    )-> DP:
 
         data = data if isinstance(data, type) else type(data)
         if not is_dataclass(data) or not issubclass(data, DataBase):
@@ -120,15 +126,16 @@ class DataParser:
 
         if key is None:
             key = data.__name__
-        if not isinstance(key,str):
+        if not isinstance(key, str):
             raise KeyError('key must be str.')
         if key.startswith('_') or key in (
-                'load_data','add_dataclass','all_reload','all_save'):
+                'load_data', 'add_dataclass', 'all_reload', 'all_save'
+        ):
             raise KeyError(f'you cannot use this key: {key}.')
 
         if yaml_config is None:
             yaml_config = {}
-        if not isinstance(yaml_config,dict):
+        if not isinstance(yaml_config, dict):
             raise ValueError(f'yaml config must be dict. not {yaml_config}.')
 
         self.__yaml_config[key] = yaml_config

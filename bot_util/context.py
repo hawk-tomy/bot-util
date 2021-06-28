@@ -8,6 +8,7 @@ from .wraped_embed import Embed
 
 __all__ = ('Context', )
 
+
 class Context(_Context):
     def __init__(self, **attrs):
         self.invoked_error = False
@@ -23,41 +24,41 @@ class Context(_Context):
 
     def _success(self, title: str, description: str= None)-> Embed:
         return Embed(
-            title= f'\u2705 {title}',
-            description= description if description is not None else '',
+            title=f'\u2705 {title}',
+            description=description if description is not None else '',
             colour=Colour.green()
-            )
+        )
 
     async def success(self, title: str, description: str= None)-> Message:
         return await self.embed(self._success(
             title=title,
             description=description
-            ))
+        ))
 
     async def re_success(self, title: str, description: str= None)-> Message:
         return await self.re_embed(self._success(
             title=title,
             description=description
-            ))
+        ))
 
     def _error(self, title: str, description: str= None)-> Embed:
         return Embed(
-            title= f'\u26a0 {title}',
-            description= description if description is not None else '',
+            title=f'\u26a0 {title}',
+            description=description if description is not None else '',
             colour=Colour.dark_red()
-            )
+        )
 
     async def error(self, title: str, description: str= None)-> Message:
         return await self.embed(self._error(
             title=title,
             description=description
-            ))
+        ))
 
     async def re_error(self, title: str, description: str= None)-> Message:
         return await self.re_embed(self._error(
             title=title,
             description=description
-            ))
+        ))
 
     async def embed(self, embed)-> Message:
         return await self.send(embed=embed)

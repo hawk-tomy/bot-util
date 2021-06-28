@@ -18,7 +18,7 @@ from . import _bot_config
 from .config import config
 
 
-__all__ = ('regex_discord_message_url','dispand')
+__all__ = ('regex_discord_message_url', 'dispand')
 
 
 regex_discord_message_url = (
@@ -54,7 +54,10 @@ async def _delete_dispand(bot, message, operator_id):
     if getattr(embed.author, "url", None) is None:
         return
     data = from_jump_url(embed.author.url)
-    if not (data["base_author_id"] == operator_id or data["author_id"] == operator_id):
+    if not (
+        data["base_author_id"] == operator_id
+        or data["author_id"] == operator_id
+    ):
         return
     await message.delete()
     for message_id in data["extra_messages"]:
@@ -71,7 +74,8 @@ async def dispand(message):
         if m.content or m.attachments:
             sent_message = await message.channel.send(embed=compose_embed(m))
             sent_messages.append(sent_message)
-        # Send the second and subsequent attachments with embed (named 'embed') respectively:
+        # Send the second and subsequent attachments with embed
+        # #(named 'embed') respectively:
         for attachment in m.attachments[1:]:
             embed = Embed(
                 color=config.embed_setting.color
@@ -146,7 +150,11 @@ def from_jump_url(url):
     return {
         "base_author_id": int(data["base_author_id"]),
         "author_id": int(data["author_id"]),
-        "extra_messages": [int(_id) for _id in data["extra_messages"].split(",")] if data["extra_messages"] else []
+        "extra_messages": (
+            [int(_id) for _id in data["extra_messages"].split(",")]
+            if data["extra_messages"]
+            else []
+        )
     }
 
 

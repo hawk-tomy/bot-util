@@ -2,15 +2,18 @@ from dataclasses import dataclass
 
 from bot_util import data
 
+
 @dataclass
 class test1:
     name: str
+
 
 @dataclass
 class test2:
     age: int
 
-data.add_dataclass('test',test1).add_dataclass('test2',test2)
+
+data.add_dataclass('test', test1).add_dataclass('test2', test2)
 
 print(dir(data))
 print(data.test)

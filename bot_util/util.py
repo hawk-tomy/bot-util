@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 
-__all__ = ('YAML_DUMP_CONFIG','split_line')
+__all__ = ('YAML_DUMP_CONFIG', 'split_line')
 
 
 YAML_DUMP_CONFIG = {
-    'encoding':'utf8',
-    'allow_unicode':True,
-    'default_flow_style':False
-    }
+    'encoding': 'utf8',
+    'allow_unicode': True,
+    'default_flow_style': False
+}
 
 
 def split_line(string: str, num: int)-> list[str]:
@@ -27,9 +27,12 @@ def split_line(string: str, num: int)-> list[str]:
         splited.append(str2)
     return splited
 
+
 def get_unique_list(
-        not_unique_list: list, *, need_flatten: bool= False
-        )-> list:
+        not_unique_list: list,
+        *,
+        need_flatten: bool= False
+)-> list:
     if need_flatten:
         not_unique_list = sum(not_unique_list, [])
     return_list = []

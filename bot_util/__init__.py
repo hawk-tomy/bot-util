@@ -1,13 +1,18 @@
 import logging
 
 
-from . import context, util
-from .context import *
-from .util import *
+from .context import Context
+from .util import split_line, YAML_DUMP_CONFIG
 from .wraped_embed import Embed
 
 
-__all__ = util.__all__ + context.__all__ + (
+__all__ = (
+    #context
+    'Context',
+    #util
+    'split_line',
+    'YAML_DUMP_CONFIG',
+    #wraped_embed
     'Embed',
 )
 logging.getLogger(__name__).addHandler(logging.NullHandler())

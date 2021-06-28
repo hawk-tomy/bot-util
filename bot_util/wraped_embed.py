@@ -41,7 +41,7 @@ class Embed(Embed_):
             url: str= EmptyEmbed,
             color: Colour= EmptyEmbed,
             timestmp: datetime.datetime= EmptyEmbed,
-            ):
+    ):
         ...
 
     @overload
@@ -53,7 +53,7 @@ class Embed(Embed_):
             url: str= EmptyEmbed,
             colour: Colour= EmptyEmbed,
             timestmp: datetime.datetime= EmptyEmbed,
-            ):
+    ):
         ...
 
     def __init__(self, **kwargs):
@@ -80,10 +80,16 @@ class Embed(Embed_):
             if len(f.get('value', '')) >= EmbedLimit.field_value:
                 raise ValueError('fileds [{i}]: value is too long')
 
-        if len(data.get('footer', {}).get('text', '')) >= EmbedLimit.footer_text:
+        if (
+            len(data.get('footer', {}).get('text', ''))
+            >= EmbedLimit.footer_text
+        ):
             raise ValueError('footer text is too long')
 
-        if len(data.get('author', {}).get('name', '')) >= EmbedLimit.author_name:
+        if (
+            len(data.get('author', {}).get('name', ''))
+            >= EmbedLimit.author_name
+        ):
             raise ValueError('author name is too long')
 
         return super().from_dict(data)
@@ -117,10 +123,12 @@ class Embed(Embed_):
         return super().footer
 
     @overload
-    def set_footer(self, *,
-            text: str= EmptyEmbed,
-            icon_url: str= EmptyEmbed
-            )-> Embed:
+    def set_footer(
+        self,
+        *,
+        text: str= EmptyEmbed,
+        icon_url: str= EmptyEmbed
+    )-> Embed:
         ...
 
     def set_footer(self, **kwargs)-> Embed:
@@ -156,11 +164,11 @@ class Embed(Embed_):
         return super().author
 
     def set_author(
-            self, *,
-            name: str,
-            url: str= EmptyEmbed,
-            icon_url: str= EmptyEmbed
-            )-> Embed:
+        self, *,
+        name: str,
+        url: str= EmptyEmbed,
+        icon_url: str= EmptyEmbed
+    )-> Embed:
 
         if len(name) >= EmbedLimit.author_name:
             raise ValueError('author name is too long')
@@ -169,7 +177,7 @@ class Embed(Embed_):
             name=name,
             url=url,
             icon_url=icon_url
-            )
+        )
 
     def remove_author(self)-> Embed:
         return super().remove_author()
@@ -193,16 +201,16 @@ class Embed(Embed_):
             name=name,
             value=value,
             inline=inline
-            )
+        )
 
     def insert_field_at(
-            self,
-            index: int,
-            *,
-            name: str,
-            value: str,
-            inline: bool= True
-            )-> Embed:
+        self,
+        index: int,
+        *,
+        name: str,
+        value: str,
+        inline: bool= True
+    )-> Embed:
 
         if len(name) >= EmbedLimit.field_name:
             raise ValueError('field name is too long')
@@ -218,7 +226,7 @@ class Embed(Embed_):
             name=name,
             value=value,
             inline=inline
-            )
+        )
 
     def clear_fields(self)-> None:
         return super().clear_fields()
@@ -227,13 +235,13 @@ class Embed(Embed_):
         return super().remove_field(index)
 
     def set_field_at(
-            self,
-            index: int,
-            *,
-            name: str,
-            value: str,
-            inline: bool=True
-            )-> Embed:
+        self,
+        index: int,
+        *,
+        name: str,
+        value: str,
+        inline: bool=True
+    )-> Embed:
 
         if len(name) >= EmbedLimit.field_name:
             raise ValueError('field name is too long')

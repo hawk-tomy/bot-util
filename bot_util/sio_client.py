@@ -20,9 +20,11 @@ __all__ = ('SioClient',)
 class Filter:
     def __init__(self, *args):
         self.filter_strings = args
+
     def filter(self, recoad):
         msg = recoad.getMessage()
         return not any((s in msg) for s in self.filter_strings)
+
 
 logger = getLogger(__name__)
 eio_log = logger.getChild('eIO')
@@ -34,6 +36,8 @@ class SocketIOSettings(ConfigBase):
     name: str= ''
     password: str= ''
     url: str= ''
+
+
 config.add_default_config(SocketIOSettings, key='socketio_settings')
 sio_setting: SocketIOSettings= config.socketio_settings
 
@@ -58,7 +62,7 @@ class SioClient(AsyncClient):
         else:
             self.__event_dict = {}
             with event_dict_path.open(encoding='utf-8', mode='w')as f:
-                yaml.dump(self.event_dict,f)
+                yaml.dump(self.event_dict, f)
         self.__loader()
         self.__events_register()
 
@@ -117,14 +121,27 @@ class SioClient(AsyncClient):
     def is_b2p_id_in(self, id_: int)-> bool:
         return id_ in self.__wait_events
 
-    async def call_b2p(self, event, data=None, *, namespace=None, callback=None, timeout=None):
+    async def call_b2p(
+            self,
+            event,
+            data=None,
+            *,
+            namespace=None,
+            callback=None,
+            timeout=None
+    ):
         if self.event_dict.get(event) != 'b2p':
             raise ValueError
         if not isinstance(data, dict):
             raise ValueError
         id_, queue = self.add_b2p_event()
         data['id'] = id_
-        await self.emit(event=event, data=data, namespace=namespace, callback=callback)
+        await self.emit(
+            event=event,
+            data=data,
+            namespace=namespace,
+            callback=callback
+        )
         return await wait_for(queue.get(), timeout=timeout)
 
     #hard coding events
@@ -135,7 +152,7 @@ class SioClient(AsyncClient):
             await self.sleep(1)
             await self.emit(
                 'login',
-                {'name': sio_setting.name,'password': sio_setting.password,}
+                {'name': sio_setting.name, 'password': sio_setting.password}
             )
 
         @self.event
@@ -152,12 +169,12 @@ class SioClient(AsyncClient):
         async def get_notice(json):
             notice = json['notices']
             not_notices = {
-                'PTsiege_plugin','PTlobby_plugin','PTPVP_plugin','PTRPG_plugin',
-                'PTNuma_plugin','STlobby_plugin','test_plugin','test1_plugin',
-                'test2_plugin','test3_plugin'
-                } - set(notice)
+                'PTsiege_plugin', 'PTlobby_plugin', 'PTPVP_plugin',
+                'PTRPG_plugin', 'PTNuma_plugin', 'STlobby_plugin',
+                'test_plugin', 'test1_plugin', 'test2_plugin', 'test3_plugin'
+            } - set(notice)
             for not_notice in not_notices:
-                await self.emit('notice',{'name':not_notice})
+                await self.emit('notice', {'name': not_notice})
 
         @self.event
         async def notice(json):
