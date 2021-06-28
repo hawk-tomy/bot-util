@@ -84,30 +84,30 @@ minecraftとの通信専用のsocketIOのクライアントを実装中です。
 
 `string`を`num`で指定した文字数で分割して`list`にして返します。主に`embed`の`field`分割用です。
 
-Parameters
-string: `str`
-    分割元の文字列です。
-num: `int`
-    分割したい最大の文字列です。
+Parameters</br>
+- string: `str`
+  - 分割元の文字列です。
+- num: `int`
+  - 分割したい最大の文字列です。
 
-Returns
-llist\[str]
-    分割された文字列です。
+Returns</br>
+- llist\[str]
+  - 分割された文字列です。
 
 ### get_unique_list
 
 名前の通り、重複の含まれる`list`を順番を保持して一意な要素にします。
 `need_flatten`を`True`にすると、二次元配列を一次元配列にして一位な要素が含まれる`list`にします。
 
-Parameters
-not_unique_list: `list`
-    一意な要素のlistにしたいlistです。
-need_flatten: `bool`
-    Trueにすると、二次元配列を一次元配列にして一意な要素にします。
+Parameters</br>
+- not_unique_list: `list`
+  - 一意な要素のlistにしたいlistです。
+- need_flatten: `bool`
+  - Trueにすると、二次元配列を一次元配列にして一意な要素にします。
 
-Returns
-`list`
-    一意な要素のlistです。
+Returns</br>
+- `list`
+  - 一意な要素のlistです。
 
 ### TimestampStyle
 
@@ -117,15 +117,15 @@ Returns
 
 discordの時間表記にするためのユーティリティ関数です。
 
-Parameters
-dt: `datetime.datetime`
-    The datetime to format.
-style: `str`
-    The style to format the datetime with.
+Parameters</br>
+- dt: `datetime.datetime`
+  - The datetime to format.
+- style: `str`
+  - The style to format the datetime with.
 
-Returns
-`str`
-    The formatted string.
+Returns</br>
+- `str`
+  - The formatted string.
 
 ## wraped embed
 
