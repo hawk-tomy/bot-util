@@ -1,4 +1,5 @@
 """
+about format_dt function and TimestampStyle type hint is
 The MIT License (MIT)
 Copyright (c) 2015-present Rapptz
 https://github.com/Rapptz/discord.py
