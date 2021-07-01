@@ -1,5 +1,5 @@
 """
-about format_dt function and TimestampStyle type hint is
+about format_dt function and TimestampStyle type hint are
 The MIT License (MIT)
 Copyright (c) 2015-present Rapptz
 https://github.com/Rapptz/discord.py
@@ -30,12 +30,11 @@ def split_line(string: str, num: int)-> list[str]:
     if len(str1_split) > 1:
         str1 = ''.join(str1_split[:-1])
         str2 = str1_split[-1] + str2
-    splited = [str1]
+    yield str1
     if len(str2) > num:
-        splited.extend(split_line(str2, num))
+        yield from split_line(str2, num)
     else:
-        splited.append(str2)
-    return splited
+        yield str2
 
 
 def get_unique_list(
