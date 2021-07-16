@@ -1,12 +1,36 @@
 from __future__ import annotations
+from typing import Optional
 
 
 from discord import Colour, Message
 from discord.ext.commands import Context as _Context
 
+from . import menus
 from .wraped_embed import Embed
 
 __all__ = ('Context', )
+
+
+class Confirm(menus.Menu):
+    def __init__(self, msg):
+        super().__init__(timeout=0, delete_message_after=True)
+        self.result = None
+        self.msg = msg
+
+    async def send(self, ctx)-> Optional[bool]:
+        await self.start(ctx, wait=True)
+        return self.result
+
+    async def send_initial_message(self, ctx: Context, channel):
+        return await channel.send(embed=await ctx._confirm(self.msg))
+
+    @menus.button('\u2705')
+    def ok(self, payload):
+        self.result = True
+
+    @menus.button('\u274c')
+    def no(self, payload):
+        self.result = False
 
 
 class Context(_Context):
@@ -24,7 +48,7 @@ class Context(_Context):
 
     def _success(self, title: str, description: str= None)-> Embed:
         return Embed(
-            title=f'\u2705 {title}',
+            title=f'\u2705 {title!s}',
             description=description if description is not None else '',
             colour=Colour.green()
         )
@@ -43,7 +67,7 @@ class Context(_Context):
 
     def _error(self, title: str, description: str= None)-> Embed:
         return Embed(
-            title=f'\u26a0 {title}',
+            title=f'\u26a0 {title!s}',
             description=description if description is not None else '',
             colour=Colour.dark_red()
         )
@@ -60,8 +84,14 @@ class Context(_Context):
             description=description
         ))
 
-    async def embed(self, embed)-> Message:
+    async def _confirm(self, msg: str)-> Embed:
+        return Embed(title=f'\u26a0\ufe0f {msg!s}')
+
+    async def confirm(self, msg: str)-> bool:
+        return await Confirm(msg).send(self)
+
+    async def embed(self, embed: Embed)-> Message:
         return await self.send(embed=embed)
 
-    async def re_embed(self, embed)-> Message:
+    async def re_embed(self, embed: Embed)-> Message:
         return await self.reply(embed=embed)
