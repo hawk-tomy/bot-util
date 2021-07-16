@@ -2,6 +2,7 @@ from __future__ import annotations
 
 
 from dataclasses import InitVar, dataclass, field
+from itertools import combinations
 from logging import getLogger
 from typing import Any, Union
 
@@ -93,6 +94,7 @@ class BlackLists(DataBase):
                 setattr(self, k, instance)
             else:
                 logger.warning(f'can not use {k} on attribute.')
+        self.combined_blacklists: dict= {}
 
     def __getitem__(self, item: str)-> BlackList:
         return self.blacklists[item]
@@ -106,6 +108,7 @@ class BlackLists(DataBase):
             if not hasattr(self, key):
                 setattr(self, key, v)
             logger.info(f'create blacklist {key=}')
+        self.combined_blacklists.clear()
         return self[key]
 
     def combine_blacklist(
@@ -114,6 +117,9 @@ class BlackLists(DataBase):
             silent_create: bool= False,
             name: str= None
     )-> BlackList:
+        name = name or ', '.join(args)
+        if name in self.combined_blacklists:
+            return self.combined_blacklists[name]
         ids_list = []
         for arg in args:
             if isinstance(arg, str):
@@ -127,11 +133,13 @@ class BlackLists(DataBase):
                 ids_list.append(arg.ids)
             else:
                 raise ValueError(f'{arg} must be BlackList.')
-        logger.info(f'combine blacklist {args}')
-        return BlackList(
-            name or ', '.join(args),
+        blacklist = BlackList(
+            name,
             get_unique_list(ids_list, need_flatten=True)
         )
+        self.combined_blacklists[name] = blacklist
+        logger.debug(f'combine blacklist {args}')
+        return blacklist
 
 
 data.add_dataclass(BlackLists, key='blacklists')
