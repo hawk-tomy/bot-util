@@ -9,13 +9,18 @@ from __future__ import annotations
 
 from collections.abc import Generator
 import datetime
-from typing import Literal, Optional
+from typing import Literal, TYPE_CHECKING, TypeVar
+
+
+if TYPE_CHECKING:
+    from typing import Optional, Union
 
 
 __all__ = (
     'YAML_DUMP_CONFIG',
     'split_line',
     'get_unique_list',
+    'maybe_int',
     'TimestampStyle',
     'format_dt',
     'docstring_updater'
@@ -27,6 +32,9 @@ YAML_DUMP_CONFIG = {
     'allow_unicode': True,
     'default_flow_style': False
 }
+
+
+T = TypeVar('T')
 
 
 def split_line(string: str, num: int)-> Generator[str]:
@@ -121,3 +129,10 @@ def docstring_updater(doc):
         func.__doc__ += doc
         return func
     return deco
+
+
+def maybe_int(obj: T)-> Union[int, T]:
+    try:
+        return int(obj)
+    except Exception:
+        return obj

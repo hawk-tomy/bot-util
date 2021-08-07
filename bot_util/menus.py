@@ -10,6 +10,7 @@ from discord.ext.menus import * # noqa: F403
 
 
 logger = logging.getLogger(__name__)
+_ListPageSource = ListPageSource
 
 
 def button_deco(emoji, **kwargs):
@@ -287,3 +288,8 @@ class MsgMenuPages(MsgMenuBase, MenuPages):
     def __init__(self, source, **kwargs):
         super(MsgMenuPages, self).__init__()
         super(MsgMenuBase, self).__init__(source, **kwargs)
+
+
+class ListPageSource(_ListPageSource):
+    async def create_entires(self):
+        raise NotImplementedError
