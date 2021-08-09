@@ -2,12 +2,19 @@ from __future__ import annotations
 
 
 from typing import Union
+from os import getenv
+
+
 import discord
 from discord.ext import commands
 
 
-from . import _bot_config
-from .config import config
+if int(getenv('BOT_UTIL_CONFIG_ENABLED', 1)):
+    from . import _bot_config
+    from .config import config
+    EMBED_COLOR = config.embed_setting.color
+else:
+    EMBED_COLOR = int(getenv('DEFAULT_EMBED_COLOR', 0))
 
 
 __all__ = ('Help')
@@ -19,7 +26,7 @@ class Help(commands.HelpCommand):
         self.no_category = "カテゴリ未設定"
         self.command_attrs["short_doc"] = "このメッセージを表示します。"
         self.command_attrs["help"] = "このBOTのヘルプコマンドです。"
-        self.color = config.embed_setting.color
+        self.color = EMBED_COLOR
 
     async def create_category_tree(
             self,

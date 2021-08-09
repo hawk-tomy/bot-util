@@ -6,16 +6,12 @@ https://github.com/DiscordBotPortalJP/dispander
 from __future__ import annotations
 
 
-import os
+from os import getenv
 import re
 
 
 from discord import Embed
 from discord.embeds import EmptyEmbed
-
-
-from . import _bot_config
-from .config import config
 
 
 __all__ = ('regex_discord_message_url', 'dispand')
@@ -30,7 +26,13 @@ regex_extra_url = (
     '&aid=(?P<author_id>[0-9]{18})'
     '&extra=(?P<extra_messages>(|[0-9,]+))'
 )
-DELETE_REACTION_EMOJI = os.environ.get("DELETE_REACTION_EMOJI", "\U0001f5d1")
+DELETE_REACTION_EMOJI = getenv("DELETE_REACTION_EMOJI", "\U0001f5d1")
+if int(getenv('BOT_UTIL_CONFIG_ENABLED', 1)):
+    from . import _bot_config
+    from .config import config
+    EMBED_COLOR = config.embed_setting.color
+else:
+    EMBED_COLOR = int(getenv('DEFAULT_EMBED_COLOR', 0))
 
 
 async def delete_dispand(bot, payload):
@@ -78,7 +80,7 @@ async def dispand(message):
         # #(named 'embed') respectively:
         for attachment in m.attachments[1:]:
             embed = Embed(
-                color=config.embed_setting.color
+                color=EMBED_COLOR
             ).set_image(
                 url=attachment.proxy_url
             )
@@ -162,7 +164,7 @@ def compose_embed(message):
     embed = Embed(
         description=message.content,
         timestamp=message.created_at,
-        color=config.embed_setting.color
+        color=EMBED_COLOR
     )
     embed.set_author(
         name=message.author.display_name,
