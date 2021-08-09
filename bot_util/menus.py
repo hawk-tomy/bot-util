@@ -291,5 +291,6 @@ class MsgMenuPages(MsgMenuBase, MenuPages):
 
 
 class ListPageSource(_ListPageSource):
-    async def create_entires(self):
+    @classmethod
+    async def create_entries(self, *args, **kwargs):
         raise NotImplementedError
