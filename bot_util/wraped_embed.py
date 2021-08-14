@@ -74,11 +74,11 @@ class Embed(Embed_):
         if len(data.get('fields', {})) >= EmbedLimit.fields:
             raise ValueError('fields is too many')
 
-        for i, f in data.get('fields', {}).items():
+        for i, f in enumerate(data.get('fields', [])):
             if len(f.get('name', '')) >= EmbedLimit.field_name:
-                raise ValueError('fileds [{i}]: name is too long')
+                raise ValueError(f'fileds [{i}]: name is too long')
             if len(f.get('value', '')) >= EmbedLimit.field_value:
-                raise ValueError('fileds [{i}]: value is too long')
+                raise ValueError(f'fileds [{i}]: value is too long')
 
         if (
             len(data.get('footer', {}).get('text', ''))
