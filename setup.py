@@ -18,5 +18,5 @@ setup(
         'pyyaml',
         'discord.py',
         'discord-ext-menus@git+https://github.com/Rapptz/discord-ext-menus',
-        ],
+    ],
 )

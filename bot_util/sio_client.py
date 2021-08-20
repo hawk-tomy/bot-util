@@ -2,7 +2,6 @@ from __future__ import annotations
 
 
 from asyncio import Queue, TimeoutError, wait_for
-from dataclasses import dataclass
 from logging import getLogger
 from os import getenv
 from pathlib import Path
@@ -10,25 +9,6 @@ from pathlib import Path
 
 from socketio import AsyncClient
 import yaml
-
-
-if int(getenv('BOT_UTIL_CONFIG_ENABLED', 1)):
-    from .config import config, ConfigBase
-
-    @dataclass
-    class SocketIOSettings(ConfigBase):
-        name: str= ''
-        password: str= ''
-        url: str= ''
-
-    config.add_default_config(SocketIOSettings, key='socketio_settings')
-    URL: str= config.socketio_settings.url
-    NAME: str= config.socketio_settings.name
-    PASSWORD: str= config.socketio_settings.password
-else:
-    URL = getenv('SIO_URL')
-    NAME = getenv('SIO_NAME')
-    PASSWORD = getenv('SIO_PASSWORD')
 
 
 __all__ = ('SioClient',)
@@ -158,7 +138,7 @@ class SioClient(AsyncClient):
             await self.sleep(1)
             await self.emit(
                 'login',
-                {'name': NAME, 'password': PASSWORD}
+                {'name': getenv('SIO_NAME'), 'password': getenv('SIO_PASSWORD')}
             )
 
         @self.event
@@ -200,4 +180,4 @@ class SioClient(AsyncClient):
 
     #run
     async def run(self):
-        await self.connect(URL, transports='websocket')
+        await self.connect(getenv('SIO_URL'), transports='websocket')

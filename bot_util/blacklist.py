@@ -2,7 +2,6 @@ from __future__ import annotations
 
 
 from dataclasses import InitVar, dataclass, field
-from itertools import combinations
 from logging import getLogger
 from typing import Any, Union
 
