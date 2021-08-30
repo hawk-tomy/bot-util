@@ -5,8 +5,6 @@ from typing import Optional
 
 
 from discord import ButtonStyle ,Colour, Embed, Interaction, Message, ui
-from discord.abc import Messageable
-from discord.ext import menus
 from discord.ext.commands import Context as _Context
 
 __all__ = ('Context', )
@@ -14,11 +12,12 @@ __all__ = ('Context', )
 
 class Confirm(ui.View):
     def __init__(self, embed: Embed= None, timeout: int=None):
-        super().__init__(timeout=timeout, delete_message_after=True)
+        super().__init__(timeout=timeout)
         self.result = None
         self.embed = embed
 
     async def send(self, ctx: Context):
+        self.author_id: int= ctx.author.id
         msg = await ctx.send(embed=self.embed, view=self)
         await self.wait()
         for item in self.children:
@@ -26,45 +25,20 @@ class Confirm(ui.View):
         await msg.edit(embed=self.embed, view=self)
         return self.result
 
-#    async def on_error(self, error: Exception, item: ui.Item, interaction: Interaction) -> None:
-#        pass
-#
+    async def interaction_check(self, interaction: Interaction)-> bool:
+        return interaction.user.id == self.author_id
+
     @ui.button(label='Confirm', style=ButtonStyle.green)
     async def confirm(self, button: ui.Button, interaction: Interaction):
-        await interaction.response.send_message('Confirming')
-        self.value = True
+        await interaction.response.send_message('確定しました', ephemeral=True)
+        self.result = True
         self.stop()
 
-    @ui.button(label='ancel', style=ButtonStyle.red)
+    @ui.button(label='Cancel', style=ButtonStyle.red)
     async def cancel(self, button: ui.Button, interaction: Interaction):
-        await interaction.response.send_message('Cancelling')
-        self.value = False
+        await interaction.response.send_message('キャンセルしました', ephemeral=True)
+        self.result = False
         self.stop()
-
-
-#class Confirm(menus.Menu):
-#    def __init__(self, title: str, description: str= None, timeout: int=None):
-#        super().__init__(timeout=timeout, delete_message_after=True)
-#        self.result = None
-#        self.title = title
-#        self.description = description
-#
-#    async def send(self, ctx)-> Optional[bool]:
-#        await self.start(ctx, wait=True)
-#        return self.result
-#
-#    async def send_initial_message(self, ctx: Context, channel: Messageable):
-#        return await channel.send(embed=ctx._confirm(title=self.title, description=self.description))
-#
-#    @menus.button('\u2705')
-#    async def ok(self, payload):
-#        self.result = True
-#        self.stop()
-#
-#    @menus.button('\u274c')
-#    async def no(self, payload):
-#        self.result = False
-#        self.stop()
 
 
 class Context(_Context):
